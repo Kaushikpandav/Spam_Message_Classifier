@@ -2,19 +2,17 @@ import streamlit as st
 import pickle
 import string
 import nltk
-from nltk.corpus import stopwords
-from nltk.stem.porter import PorterStemmer
-
-# Find NLTK data directory
-nltk.data.path.append(nltk.data.find('corpora'))
 
 # Download necessary NLTK data
 nltk.download('punkt')
 nltk.download('stopwords')
 
+from nltk.corpus import stopwords
+from nltk.stem.porter import PorterStemmer
+
 ps = PorterStemmer()
 
-# Stemming
+# Stemming function
 def transform_text(text):
     text = text.lower()
     text = nltk.word_tokenize(text)
@@ -40,25 +38,41 @@ def transform_text(text):
     return " ".join(y)
 
 # Load the vectorizer and model
-tfidf = pickle.load(open('vectorizer.pkl', 'rb'))
-model = pickle.load(open('model.pkl', 'rb'))
+try:
+    with open('vectorizer.pkl', 'rb') as f:
+        tfidf = pickle.load(f)
+    with open('model.pkl', 'rb') as f:
+        model = pickle.load(f)
+except Exception as e:
+    st.error(f"Error loading model or vectorizer: {e}")
 
 st.title("Spam Message Verifier System")
 
 input_msg = st.text_area("Enter your message below:")
 
 if st.button('Click here to check'):
-    # 1. Preprocess
-    transformed_msg = transform_text(input_msg)
-    
-    # 2. Vectorize
-    vector_input = tfidf.transform([transformed_msg])
-    
-    # 3. Predict
-    result = model.predict(vector_input)[0]
-    
-    # 4. Display
-    if result == 1:
-        st.header("Spam")
+    if not input_msg:
+        st.warning("Please enter a message to check.")
     else:
-        st.header("Not Spam")
+        # 1. Preprocess
+        transformed_msg = transform_text(input_msg)
+        
+        # 2. Vectorize
+        try:
+            vector_input = tfidf.transform([transformed_msg])
+        except Exception as e:
+            st.error(f"Error transforming input: {e}")
+            vector_input = None
+        
+        if vector_input is not None:
+            # 3. Predict
+            try:
+                result = model.predict(vector_input)[0]
+                
+                # 4. Display
+                if result == 1:
+                    st.header("Spam")
+                else:
+                    st.header("Not Spam")
+            except Exception as e:
+                st.error(f"Error making prediction: {e}")
