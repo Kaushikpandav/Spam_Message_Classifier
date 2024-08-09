@@ -14,6 +14,7 @@ Insights into the accuracy and performance of the model
 Practical applications and future improvements
 Check out the full article here 👉 [
 
+Just dowload, Run & Enjoy ! 😉
 Medium : https://medium.com/@kaushikpandav16/message-email-spam-detection-using-machine-learning-807b727533d5 ]
 
 
